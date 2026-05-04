@@ -95,15 +95,46 @@
                 position: fixed;
                 top: 0; left: 0;
                 width: 100%; height: 100vh;
-                background: rgba(20,20,26,0.98);
+                background-image: url('images/restaurant_bg.png');
+                background-size: cover;
+                background-position: center;
                 flex-direction: column;
                 justify-content: center;
                 align-items: center;
-                gap: 2.5rem;
+                gap: 0;
                 z-index: 999;
             }
+            .nav-links::before {
+                content: '';
+                position: fixed;
+                inset: 0;
+                background: linear-gradient(rgba(20,20,26,0.82), rgba(20,20,26,0.92));
+                z-index: -1;
+            }
             .nav-links.open { display: flex; animation: fadeIn 0.3s ease; }
-            .nav-links a { font-size: 1.3rem; }
+            .nav-links a {
+                font-size: 1.2rem;
+                padding: 18px 40px;
+                width: 100%;
+                text-align: center;
+                border-bottom: 1px solid rgba(255,255,255,0.06);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 14px;
+                color: rgba(255,255,255,0.75);
+                letter-spacing: 2px;
+                transition: 0.2s;
+            }
+            .nav-links a:hover, .nav-links a.active {
+                color: var(--orange);
+                background: rgba(255,159,10,0.06);
+            }
+            .nav-links a .nav-icon {
+                font-size: 1.3rem;
+                width: 28px;
+                text-align: center;
+            }
             .logo { font-size: 1rem; }
             .hero h1 { font-size: 2.2rem; }
             .hero-subtitle { font-size: 0.9rem; letter-spacing: 2px; }
@@ -534,13 +565,11 @@
             <span></span><span></span><span></span>
         </div>
         <div class="nav-links" id="navLinks">
-            <a onclick="navTo('home'); closeMenu();" id="nav-home" class="active">Home</a>
-            <a onclick="navTo('menu'); closeMenu();" id="nav-menu">Menu</a>
-            <a onclick="navTo('user'); closeMenu();" id="nav-user">Profile</a>
-            <a onclick="navTo('cart'); closeMenu();" id="nav-cart" class="cart-icon">
-                Cart <span class="cart-badge" id="cartBadge">0</span>
-            </a>
-            <a onclick="navTo('admin-login'); closeMenu();" id="nav-admin">Admin</a>
+            <a onclick="navTo('home'); closeMenu();" id="nav-home" class="active"><span class="nav-icon">🏠</span> Home</a>
+            <a onclick="navTo('menu'); closeMenu();" id="nav-menu"><span class="nav-icon">🍽️</span> Menu</a>
+            <a onclick="navTo('user'); closeMenu();" id="nav-user"><span class="nav-icon">👤</span> Profile</a>
+            <a onclick="navTo('cart'); closeMenu();" id="nav-cart" class="cart-icon"><span class="nav-icon">🛒</span> Cart <span class="cart-badge" id="cartBadge">0</span></a>
+            <a onclick="navTo('admin-login'); closeMenu();" id="nav-admin"><span class="nav-icon">⚙️</span> Admin</a>
         </div>
     </nav>
 
