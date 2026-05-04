@@ -197,9 +197,96 @@
         }
         .close-modal:hover { color: white; transform: scale(1.1); }
         #modalImg { width: 100%; height: 200px; object-fit: cover; border-radius: 15px; margin-bottom: 1.5rem; border: 2px solid rgba(255,255,255,0.05); }
+
+        /* Toast Notifications */
+        #toast-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            background: rgba(30, 30, 36, 0.95);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-left: 4px solid var(--orange);
+            color: white;
+            padding: 16px 20px;
+            border-radius: 14px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+            backdrop-filter: blur(12px);
+            animation: slideInToast 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            min-width: 280px;
+        }
+        .toast.success { border-left-color: #34d399; }
+        .toast.cart { border-left-color: var(--orange); }
+        .toast-icon { font-size: 1.4rem; }
+        @keyframes slideInToast {
+            from { opacity: 0; transform: translateX(80px) scale(0.9); }
+            to   { opacity: 1; transform: translateX(0)   scale(1); }
+        }
+        @keyframes slideOutToast {
+            from { opacity: 1; transform: translateX(0)   scale(1); }
+            to   { opacity: 0; transform: translateX(80px) scale(0.9); }
+        }
+        .toast.hide { animation: slideOutToast 0.3s ease forwards; }
+
+        /* Order Success Overlay */
+        #orderSuccessOverlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(8px);
+            z-index: 3000;
+            justify-content: center;
+            align-items: center;
+        }
+        #orderSuccessOverlay.show { display: flex; animation: fadeIn 0.4s ease; }
+        .order-success-card {
+            background: linear-gradient(145deg, #1e2a1e, var(--bg-card));
+            border: 1px solid #34d399;
+            border-radius: 24px;
+            padding: 3rem 2.5rem;
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 0 60px rgba(52, 211, 153, 0.2);
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.7); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+        .success-check { font-size: 4rem; margin-bottom: 1rem; animation: bounceIn 0.6s 0.2s both; }
+        @keyframes bounceIn {
+            0%   { transform: scale(0); }
+            60%  { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
     </style>
 </head>
 <body>
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <!-- Order Success Overlay -->
+    <div id="orderSuccessOverlay">
+        <div class="order-success-card">
+            <div class="success-check">✅</div>
+            <h2 class="cinzel" style="color:#34d399; margin-bottom:10px; font-size:1.8rem;">Order Placed!</h2>
+            <p id="orderSuccessId" style="color:var(--text-muted); font-size:0.95rem; margin-bottom:0.5rem;"></p>
+            <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:2rem;">We're preparing your delicious food 🍽️</p>
+            <button class="btn btn-accent" onclick="closeOrderSuccess()" style="width:100%; border-radius:12px; padding:14px;">Track My Order</button>
+        </div>
+    </div>
     <div class="bg-layer"></div>
     <div class="bg-overlay"></div>
     <div class="particles"></div>
@@ -579,15 +666,16 @@
             else cart.push({ id: cartId, name: currentModalItem.name + ' (' + variantName + ')', price: price, qty: 1 });
             
             updateCart();
+            showToast('🛒', currentModalItem.name + ' added to cart!', 'cart');
             
             let btn = document.getElementById('modalAddBtn');
-            btn.style.background = 'var(--text-muted)';
-            btn.innerText = 'Added!';
+            btn.style.background = '#34d399';
+            btn.innerText = '✓ Added!';
             setTimeout(() => { 
                 btn.style.background = 'var(--accent)'; 
                 btn.innerText = 'Add to Cart'; 
                 closeModal();
-            }, 500);
+            }, 700);
         }
 
         function changeQty(idx, delta) {
@@ -626,7 +714,7 @@
 
         document.getElementById('checkoutForm').onsubmit = (e) => {
             e.preventDefault();
-            if(!cart.length) return alert('Cart empty');
+            if(!cart.length) return showToast('⚠️', 'Your cart is empty!', 'cart');
             let sub = cart.reduce((s, i) => s + (i.price * i.qty), 0);
             let order = {
                 id: 'WK-' + Math.floor(Math.random()*9000+1000),
@@ -642,8 +730,27 @@
                 localStorage.setItem('wk_user', JSON.stringify(currentUser));
                 setupProfile();
             }
-            cart = []; updateCart(); alert('Order placed: ' + order.id); navTo('user');
+            cart = []; updateCart();
+            document.getElementById('orderSuccessId').innerText = 'Order ID: ' + order.id;
+            document.getElementById('orderSuccessOverlay').classList.add('show');
         };
+
+        function closeOrderSuccess() {
+            document.getElementById('orderSuccessOverlay').classList.remove('show');
+            navTo('user');
+        }
+
+        function showToast(icon, message, type = 'cart') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `<span class="toast-icon">${icon}</span><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.classList.add('hide');
+                setTimeout(() => toast.remove(), 400);
+            }, 3000);
+        }
 
         // Auth
         function switchAuth(tab) {
