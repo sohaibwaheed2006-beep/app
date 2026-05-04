@@ -271,6 +271,125 @@
             60%  { transform: scale(1.2); }
             100% { transform: scale(1); }
         }
+
+        /* Order Tracker */
+        .tracker-steps {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            position: relative;
+            margin: 1.5rem 0;
+        }
+        .tracker-steps::before {
+            content: '';
+            position: absolute;
+            top: 18px;
+            left: 10%;
+            width: 80%;
+            height: 3px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            z-index: 0;
+        }
+        .tracker-fill {
+            position: absolute;
+            top: 18px;
+            left: 10%;
+            height: 3px;
+            background: #34d399;
+            border-radius: 2px;
+            z-index: 1;
+            transition: width 1.5s ease;
+            width: 0%;
+        }
+        .tracker-step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            z-index: 2;
+            flex: 1;
+        }
+        .step-dot {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.2);
+            background: var(--bg-card);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            transition: 0.5s;
+        }
+        .step-dot.active {
+            border-color: #34d399;
+            background: rgba(52,211,153,0.15);
+            box-shadow: 0 0 15px rgba(52,211,153,0.4);
+        }
+        .step-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-align: center;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .step-label.active { color: #34d399; }
+        .bill-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.88rem;
+            color: var(--text-muted);
+        }
+        .bill-row:last-child { border-bottom: none; }
+        .bill-row strong { color: white; }
+        .bill-total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 14px 0 0;
+            margin-top: 8px;
+            border-top: 1px solid rgba(255,255,255,0.15);
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: white;
+        }
+        .preparing-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,159,10,0.15);
+            border: 1px solid var(--orange);
+            color: var(--orange);
+            padding: 6px 16px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            animation: pulse 1.5s ease infinite;
+        }
+        .preparing-dot {
+            width: 8px; height: 8px;
+            background: var(--orange);
+            border-radius: 50%;
+            animation: pulse 1.5s ease infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50%       { opacity: 0.4; }
+        }
+        #orderSuccessOverlay {
+            overflow-y: auto;
+        }
+        .order-success-card {
+            max-height: 92vh;
+            overflow-y: auto;
+        }
+        .order-success-card::-webkit-scrollbar { width: 4px; }
+        .order-success-card::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
     </style>
 </head>
 <body>
@@ -280,11 +399,60 @@
     <!-- Order Success Overlay -->
     <div id="orderSuccessOverlay">
         <div class="order-success-card">
-            <div class="success-check">✅</div>
-            <h2 class="cinzel" style="color:#34d399; margin-bottom:10px; font-size:1.8rem;">Order Placed!</h2>
-            <p id="orderSuccessId" style="color:var(--text-muted); font-size:0.95rem; margin-bottom:0.5rem;"></p>
-            <p style="color:var(--text-muted); font-size:0.85rem; margin-bottom:2rem;">We're preparing your delicious food 🍽️</p>
-            <button class="btn btn-accent" onclick="closeOrderSuccess()" style="width:100%; border-radius:12px; padding:14px;">Track My Order</button>
+            <!-- Top -->
+            <div style="text-align:center; margin-bottom:1.5rem;">
+                <div class="success-check">✅</div>
+                <h2 class="cinzel" style="color:#34d399; margin-bottom:6px; font-size:1.8rem;">Order Confirmed!</h2>
+                <p id="orderSuccessId" style="color:var(--text-muted); font-size:0.9rem; margin-bottom:10px;"></p>
+                <div class="preparing-badge"><div class="preparing-dot"></div> Preparing Your Order</div>
+            </div>
+
+            <!-- Tracker -->
+            <div style="position:relative; margin-bottom:0.5rem;">
+                <div class="tracker-steps">
+                    <div class="tracker-fill" id="trackerFill"></div>
+                    <div class="tracker-step">
+                        <div class="step-dot active" id="step1">✅</div>
+                        <span class="step-label active">Placed</span>
+                    </div>
+                    <div class="tracker-step">
+                        <div class="step-dot active" id="step2">🍳</div>
+                        <span class="step-label active">Preparing</span>
+                    </div>
+                    <div class="tracker-step">
+                        <div class="step-dot" id="step3">📦</div>
+                        <span class="step-label">Ready</span>
+                    </div>
+                    <div class="tracker-step">
+                        <div class="step-dot" id="step4">🚴</div>
+                        <span class="step-label">On the Way</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bill Summary -->
+            <div style="background:rgba(0,0,0,0.25); border-radius:14px; padding:16px; margin:1.2rem 0;">
+                <h4 class="cinzel" style="color:white; margin-bottom:12px; font-size:0.95rem; letter-spacing:1px;">🧾 Bill Summary</h4>
+                <div id="billItems"></div>
+                <div class="bill-total-row">
+                    <span>Delivery Fee</span>
+                    <span style="color:var(--text-muted)">Rs. 100</span>
+                </div>
+                <div class="bill-total-row" style="color:var(--orange); font-size:1.15rem;">
+                    <span>Total Paid</span>
+                    <span id="billTotal"></span>
+                </div>
+            </div>
+
+            <!-- Delivery Info -->
+            <div style="background:rgba(0,0,0,0.25); border-radius:14px; padding:16px; margin-bottom:1.2rem;">
+                <h4 class="cinzel" style="color:white; margin-bottom:10px; font-size:0.95rem; letter-spacing:1px;">📍 Delivery Details</h4>
+                <div class="bill-row"><span>Name</span><strong id="billName"></strong></div>
+                <div class="bill-row"><span>Phone</span><strong id="billPhone"></strong></div>
+                <div class="bill-row" style="border:none;"><span>Address</span><strong id="billAddress" style="max-width:60%; text-align:right;"></strong></div>
+            </div>
+
+            <button class="btn btn-accent" onclick="closeOrderSuccess()" style="width:100%; border-radius:12px; padding:14px; margin-top:0.5rem;">✓ Done</button>
         </div>
     </div>
     <div class="bg-layer"></div>
@@ -716,10 +884,17 @@
             e.preventDefault();
             if(!cart.length) return showToast('⚠️', 'Your cart is empty!', 'cart');
             let sub = cart.reduce((s, i) => s + (i.price * i.qty), 0);
+            let address = document.getElementById('orderAddress').value;
+            let orderType = document.getElementById('orderType').value;
             let order = {
                 id: 'WK-' + Math.floor(Math.random()*9000+1000),
-                customer: { name: document.getElementById('orderName').value, phone: document.getElementById('orderPhone').value },
-                items: [...cart], total: sub + 100, status: 'Pending', date: new Date().toLocaleDateString()
+                customer: { 
+                    name: document.getElementById('orderName').value, 
+                    phone: document.getElementById('orderPhone').value,
+                    address: address,
+                    type: orderType
+                },
+                items: [...cart], total: sub + 100, status: 'Preparing', date: new Date().toLocaleDateString()
             };
             let orders = JSON.parse(localStorage.getItem('wk_orders')) || [];
             orders.unshift(order);
@@ -730,13 +905,37 @@
                 localStorage.setItem('wk_user', JSON.stringify(currentUser));
                 setupProfile();
             }
-            cart = []; updateCart();
+
+            // Populate Bill Summary
             document.getElementById('orderSuccessId').innerText = 'Order ID: ' + order.id;
-            document.getElementById('orderSuccessOverlay').classList.add('show');
+            document.getElementById('billName').innerText = order.customer.name;
+            document.getElementById('billPhone').innerText = order.customer.phone;
+            document.getElementById('billAddress').innerText = address || orderType;
+            document.getElementById('billTotal').innerText = 'Rs. ' + order.total;
+            
+            let billHtml = order.items.map(i => `
+                <div class="bill-row">
+                    <span>${i.name} <span style="color:var(--orange);">x${i.qty}</span></span>
+                    <strong>Rs. ${i.price * i.qty}</strong>
+                </div>
+            `).join('');
+            document.getElementById('billItems').innerHTML = billHtml;
+
+            // Show overlay
+            const overlay = document.getElementById('orderSuccessOverlay');
+            overlay.classList.add('show');
+
+            // Animate tracker fill to "Preparing" (33% of bar)
+            setTimeout(() => {
+                document.getElementById('trackerFill').style.width = '33%';
+            }, 300);
+
+            cart = []; updateCart();
         };
 
         function closeOrderSuccess() {
             document.getElementById('orderSuccessOverlay').classList.remove('show');
+            document.getElementById('trackerFill').style.width = '0%';
             navTo('user');
         }
 
