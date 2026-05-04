@@ -66,19 +66,64 @@
 
         /* Navbar */
         nav {
-            position: fixed; top: 0; width: 100%; padding: 1.2rem 5%;
-            background: rgba(30, 30, 36, 0.85); backdrop-filter: blur(12px);
+            position: fixed; top: 0; width: 100%; padding: 1rem 5%;
+            background: rgba(30, 30, 36, 0.95); backdrop-filter: blur(12px);
             display: flex; justify-content: space-between; align-items: center;
             border-bottom: 1px solid rgba(255,255,255,0.05); z-index: 1000;
         }
-        .logo { font-size: 1.2rem; color: var(--text-main); font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 15px; }
-        .logo img { width: 45px; height: 45px; border-radius: 50%; border: 2px solid var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
+        .logo { font-size: 1.1rem; color: var(--text-main); font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 10px; }
+        .logo img { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--accent); box-shadow: 0 0 10px var(--accent-glow); flex-shrink:0; }
         
-        .nav-links { display: flex; gap: 2rem; align-items: center; }
-        .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; text-transform: uppercase; font-weight: 600; cursor: pointer; transition: 0.3s; }
+        .nav-links { display: flex; gap: 1.5rem; align-items: center; }
+        .nav-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; text-transform: uppercase; font-weight: 600; cursor: pointer; transition: 0.3s; white-space:nowrap; }
         .nav-links a:hover, .nav-links a.active { color: var(--accent); }
-        .cart-icon { position: relative; font-size: 1.2rem; }
-        .cart-badge { position: absolute; top: -8px; right: -12px; background: var(--orange); color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 50%; }
+        .cart-icon { position: relative; font-size: 1rem; }
+        .cart-badge { position: absolute; top: -8px; right: -12px; background: var(--orange); color: white; font-size: 0.65rem; padding: 2px 5px; border-radius: 50%; }
+
+        /* Hamburger */
+        .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 5px; z-index: 1001; }
+        .hamburger span { width: 24px; height: 2px; background: white; border-radius: 2px; transition: 0.3s; display: block; }
+        .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+        .hamburger.open span:nth-child(2) { opacity: 0; }
+        .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+        /* Mobile Nav */
+        @media(max-width: 768px) {
+            .hamburger { display: flex; }
+            .nav-links {
+                display: none;
+                position: fixed;
+                top: 0; left: 0;
+                width: 100%; height: 100vh;
+                background: rgba(20,20,26,0.98);
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                gap: 2.5rem;
+                z-index: 999;
+            }
+            .nav-links.open { display: flex; animation: fadeIn 0.3s ease; }
+            .nav-links a { font-size: 1.3rem; }
+            .logo { font-size: 1rem; }
+            .hero h1 { font-size: 2.2rem; }
+            .hero-subtitle { font-size: 0.9rem; letter-spacing: 2px; }
+            .hero-logo { width: 110px; height: 110px; }
+            .section { padding: 100px 4% 50px; }
+            .menu-card { margin-top: 60px; }
+            .cart-grid { grid-template-columns: 1fr !important; }
+            .panel { padding: 1.5rem; border-radius: 16px; }
+            .tabs { gap: 0.5rem; flex-wrap: wrap; }
+            .tab-btn { padding: 8px 16px; font-size: 0.8rem; }
+            #toast-container { bottom: 15px; right: 15px; left: 15px; }
+            .toast { min-width: unset; width: 100%; }
+            .tracker-steps::before { left: 8%; width: 84%; }
+            th, td { padding: 0.6rem 0.4rem; font-size: 0.8rem; }
+        }
+        @media(max-width: 480px) {
+            .hero h1 { font-size: 1.8rem; }
+            .menu-category { grid-template-columns: 1fr; }
+            .order-success-card { padding: 2rem 1.2rem; }
+        }
 
         /* Sections */
         .section { min-height: 100vh; padding: 120px 5% 50px; display: none; animation: fadeIn 0.4s ease; }
@@ -480,18 +525,22 @@
     </div>
 
     <nav>
-        <div class="logo" onclick="navTo('home')">
+        <div class="logo" onclick="navTo('home'); closeMenu();">
             <img src="images/chef_logo.png" alt="Logo">
             Waheed's Kitchen
         </div>
+        <!-- Hamburger -->
+        <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+            <span></span><span></span><span></span>
+        </div>
         <div class="nav-links" id="navLinks">
-            <a onclick="navTo('home')" id="nav-home" class="active">Home</a>
-            <a onclick="navTo('menu')" id="nav-menu">Menu</a>
-            <a onclick="navTo('user')" id="nav-user">Profile</a>
-            <a onclick="navTo('cart')" id="nav-cart" class="cart-icon">
+            <a onclick="navTo('home'); closeMenu();" id="nav-home" class="active">Home</a>
+            <a onclick="navTo('menu'); closeMenu();" id="nav-menu">Menu</a>
+            <a onclick="navTo('user'); closeMenu();" id="nav-user">Profile</a>
+            <a onclick="navTo('cart'); closeMenu();" id="nav-cart" class="cart-icon">
                 Cart <span class="cart-badge" id="cartBadge">0</span>
             </a>
-            <a onclick="navTo('admin-login')" id="nav-admin">Admin</a>
+            <a onclick="navTo('admin-login'); closeMenu();" id="nav-admin">Admin</a>
         </div>
     </nav>
 
@@ -778,6 +827,16 @@
             renderMenu(); updateCart(); navTo('home');
             if(currentUser) setupProfile();
         };
+
+        // Mobile menu
+        function toggleMenu() {
+            document.getElementById('hamburger').classList.toggle('open');
+            document.getElementById('navLinks').classList.toggle('open');
+        }
+        function closeMenu() {
+            document.getElementById('hamburger').classList.remove('open');
+            document.getElementById('navLinks').classList.remove('open');
+        }
 
         // Navigation
         function navTo(id) {
