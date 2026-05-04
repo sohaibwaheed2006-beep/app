@@ -614,6 +614,31 @@
         </div>
     </section>
 
+    <!-- Edit Item Modal -->
+    <div id="editItemModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); backdrop-filter:blur(6px); z-index:4000; justify-content:center; align-items:center;">
+        <div style="background:var(--bg-card); border-radius:20px; padding:2rem; width:90%; max-width:400px; border:1px solid rgba(255,255,255,0.1); box-shadow:0 20px 60px rgba(0,0,0,0.8);">
+            <h3 class="cinzel" style="margin-bottom:1.5rem; color:white;">✏️ Edit Item</h3>
+            <input type="hidden" id="editItemId">
+            <input type="hidden" id="editItemCat">
+            <div class="form-group">
+                <label style="color:var(--text-muted); font-size:0.85rem; font-weight:600; margin-bottom:6px; display:block;">Item Name</label>
+                <input type="text" id="editItemName" class="form-control" placeholder="Item name">
+            </div>
+            <div class="form-group">
+                <label style="color:var(--text-muted); font-size:0.85rem; font-weight:600; margin-bottom:6px; display:block;">Description</label>
+                <input type="text" id="editItemDesc" class="form-control" placeholder="Description">
+            </div>
+            <div class="form-group">
+                <label style="color:var(--text-muted); font-size:0.85rem; font-weight:600; margin-bottom:6px; display:block;">Price (Rs.)</label>
+                <input type="number" id="editItemPrice" class="form-control" placeholder="Price">
+            </div>
+            <div style="display:flex; gap:10px; margin-top:1rem;">
+                <button class="btn btn-accent" onclick="saveEditItem()" style="flex:1; border-radius:10px;">Save Changes</button>
+                <button class="btn btn-outline" onclick="closeEditModal()" style="flex:1; border-radius:10px;">Cancel</button>
+            </div>
+        </div>
+    </div>
+
     <section id="admin-dash" class="section">
         <h2 class="cinzel" style="margin-bottom:2rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap;">
             <span>Admin Dashboard</span>
@@ -635,13 +660,40 @@
                     <tbody id="adminOrdersTable"></tbody>
                 </table>
             </div>
+
+            <!-- Add New Item Form -->
+            <div class="panel" style="margin-top:2rem; grid-column: 1 / -1;">
+                <h3 class="cinzel" style="margin-bottom:1.5rem;">➕ Add New Item</h3>
+                <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:1rem;">
+                    <div class="form-group" style="margin:0;">
+                        <label style="color:var(--text-muted); font-size:0.8rem; font-weight:600;">Item Name</label>
+                        <input type="text" id="newItemName" class="form-control" placeholder="e.g. Chicken Karahi">
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label style="color:var(--text-muted); font-size:0.8rem; font-weight:600;">Description</label>
+                        <input type="text" id="newItemDesc" class="form-control" placeholder="Short description">
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label style="color:var(--text-muted); font-size:0.8rem; font-weight:600;">Price (Rs.)</label>
+                        <input type="number" id="newItemPrice" class="form-control" placeholder="e.g. 850">
+                    </div>
+                    <div class="form-group" style="margin:0;">
+                        <label style="color:var(--text-muted); font-size:0.8rem; font-weight:600;">Category</label>
+                        <select id="newItemCat" class="form-control">
+                            <option value="cooked">Cooked</option>
+                            <option value="marinated">Marinated</option>
+                            <option value="deals">Deals</option>
+                        </select>
+                    </div>
+                </div>
+                <button class="btn btn-accent" onclick="addMenuItem()" style="margin-top:1.2rem; padding:12px 30px; border-radius:12px;">+ Add Item</button>
+            </div>
+
+            <!-- Menu Management Table -->
             <div class="panel" style="margin-top:2rem; grid-column: 1 / -1; overflow-x:auto;">
-                <h3 class="cinzel" style="margin-bottom: 1.5rem; display:flex; justify-content:space-between; align-items:center;">
-                    Menu Management
-                    <button class="btn btn-accent" style="padding: 8px 15px; font-size:0.8rem;" onclick="addMenuItem()">+ Add Item</button>
-                </h3>
+                <h3 class="cinzel" style="margin-bottom: 1.5rem;">📋 Menu Management</h3>
                 <table>
-                    <thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Action</th></tr></thead>
+                    <thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Actions</th></tr></thead>
                     <tbody id="adminMenuTable"></tbody>
                 </table>
             </div>
@@ -1036,30 +1088,77 @@
             ['deals', 'marinated', 'cooked'].forEach(cat => {
                 menuData[cat].forEach(item => {
                     html += `<tr>
-                        <td>${item.name}</td>
-                        <td style="text-transform:capitalize">${cat}</td>
-                        <td>Rs. ${item.price}</td>
-                        <td><button class="btn btn-outline" style="padding:4px 8px; font-size:0.7rem" onclick="deleteMenuItem('${cat}', '${item.id}')">Delete</button></td>
+                        <td style="font-weight:600; color:white;">${item.name}</td>
+                        <td style="text-transform:capitalize; color:var(--text-muted);">${cat}</td>
+                        <td style="color:var(--orange); font-weight:bold;">Rs. ${item.price}</td>
+                        <td style="display:flex; gap:6px;">
+                            <button class="btn btn-outline" style="padding:5px 12px; font-size:0.75rem; border-color:var(--orange); color:var(--orange);" onclick="openEditModal('${cat}', '${item.id}')">✏️ Edit</button>
+                            <button class="btn btn-outline" style="padding:5px 12px; font-size:0.75rem; color:#ff4d4d; border-color:#ff4d4d;" onclick="deleteMenuItem('${cat}', '${item.id}')">🗑 Delete</button>
+                        </td>
                     </tr>`;
                 });
             });
             document.getElementById('adminMenuTable').innerHTML = html;
         }
-        function deleteMenuItem(cat, id) {
-            if(confirm('Delete item?')) {
-                menuData[cat] = menuData[cat].filter(i => i.id !== id);
-                localStorage.setItem('wk_menuData', JSON.stringify(menuData));
-                renderAdminMenu(); renderMenu();
-            }
+
+        function openEditModal(cat, id) {
+            let item = menuData[cat].find(i => i.id === id);
+            if(!item) return;
+            document.getElementById('editItemId').value = id;
+            document.getElementById('editItemCat').value = cat;
+            document.getElementById('editItemName').value = item.name;
+            document.getElementById('editItemDesc').value = item.desc || '';
+            document.getElementById('editItemPrice').value = item.price;
+            const modal = document.getElementById('editItemModal');
+            modal.style.display = 'flex';
         }
-        function addMenuItem() {
-            let name = prompt("Item Name:"); if(!name) return;
-            let cat = prompt("Category (deals/marinated/cooked):", "cooked"); if(!menuData[cat]) return alert("Invalid category");
-            let price = prompt("Price:"); if(!price) return;
-            let id = cat[0] + Math.floor(Math.random()*9000);
-            menuData[cat].push({ id, name, desc: 'Added by Admin', price: parseInt(price), img: 'images/chef_logo.png' });
+
+        function closeEditModal() {
+            document.getElementById('editItemModal').style.display = 'none';
+        }
+
+        function saveEditItem() {
+            let id  = document.getElementById('editItemId').value;
+            let cat = document.getElementById('editItemCat').value;
+            let name  = document.getElementById('editItemName').value.trim();
+            let desc  = document.getElementById('editItemDesc').value.trim();
+            let price = parseInt(document.getElementById('editItemPrice').value);
+            if(!name || !price) return showToast('⚠️', 'Name and price are required!', 'cart');
+            let item = menuData[cat].find(i => i.id === id);
+            if(item) { item.name = name; item.desc = desc; item.price = price; }
+            localStorage.setItem('wk_menuData', JSON.stringify(menuData));
+            closeEditModal();
+            renderAdminMenu();
+            renderMenu();
+            showToast('✅', name + ' updated!', 'success');
+        }
+
+        function deleteMenuItem(cat, id) {
+            let item = menuData[cat].find(i => i.id === id);
+            if(!item) return;
+            if(!confirm('Delete "' + item.name + '"?')) return;
+            menuData[cat] = menuData[cat].filter(i => i.id !== id);
             localStorage.setItem('wk_menuData', JSON.stringify(menuData));
             renderAdminMenu(); renderMenu();
+            showToast('🗑', item.name + ' deleted!', 'cart');
+        }
+
+        function addMenuItem() {
+            let name  = document.getElementById('newItemName').value.trim();
+            let desc  = document.getElementById('newItemDesc').value.trim();
+            let price = parseInt(document.getElementById('newItemPrice').value);
+            let cat   = document.getElementById('newItemCat').value;
+            if(!name) return showToast('⚠️', 'Please enter an item name!', 'cart');
+            if(!price || price < 1) return showToast('⚠️', 'Please enter a valid price!', 'cart');
+            let id = cat[0] + Math.floor(Math.random()*90000);
+            menuData[cat].push({ id, name, desc: desc || 'Added by Admin', price, img: 'images/chef_logo.png' });
+            localStorage.setItem('wk_menuData', JSON.stringify(menuData));
+            renderAdminMenu(); renderMenu();
+            // Clear fields
+            document.getElementById('newItemName').value = '';
+            document.getElementById('newItemDesc').value = '';
+            document.getElementById('newItemPrice').value = '';
+            showToast('✅', name + ' added to menu!', 'success');
         }
         function updateStatus(id, stat) {
             let orders = JSON.parse(localStorage.getItem('wk_orders')) || [];
