@@ -28,7 +28,7 @@
             position: fixed;
             top: -10%; left: -10%;
             width: 120%; height: 120%;
-            background-image: url('restaurant_bg.png');
+            background-image: url('images/restaurant_bg.png');
             background-size: cover;
             background-position: center;
             z-index: -2;
@@ -226,7 +226,7 @@
 
     <nav>
         <div class="logo" onclick="navTo('home')">
-            <img src="chef_logo.png" alt="Logo">
+            <img src="images/chef_logo.png" alt="Logo">
             Waheed's Kitchen
         </div>
         <div class="nav-links" id="navLinks">
@@ -243,7 +243,7 @@
     <!-- Home Section -->
     <section id="home" class="section active">
         <div class="hero">
-            <img src="chef_logo.png" alt="Waheed's Kitchen Chef" class="hero-logo">
+            <img src="images/chef_logo.png" alt="Waheed's Kitchen Chef" class="hero-logo">
             <h1 class="cinzel">Waheed's Kitchen</h1>
             <p class="hero-subtitle">Authentic Flavours</p>
             <div class="btn-group" style="display:flex; gap:15px;">
@@ -395,24 +395,24 @@
 
     <script>
         const imgMap = {
-            tikka: 'user_1.jpg',
-            kabab: 'kabab.png',
-            roast: 'roast.png',
-            biryani: 'biryani.png',
-            polao: 'chick_pulao.jpg',
-            boti: 'boti.png',
-            fish: 'fish.png',
-            wings: 'wings.png',
-            naan: 'naan.png',
-            salad: 'salad.png',
-            chatni: 'chatni.png',
-            raw_boti: 'raw_boti.png',
-            raw_tikka: 'raw_tikka.png',
-            raw_bbq: 'raw_tikka.png',
-            raw_kabab: 'raw_kabab.png',
-            raw_fish: 'raw_fish.png',
-            raw_wings: 'raw_wings.png',
-            duo_deal: 'user_4.jpg'
+            tikka: 'images/real_tikka.jpg',
+            kabab: 'images/kabab.png',
+            roast: 'images/roast.png',
+            biryani: 'images/biryani.png',
+            polao: 'images/real_pulao.jpg',
+            boti: 'images/boti.png',
+            fish: 'images/fish.png',
+            wings: 'images/wings.png',
+            naan: 'images/naan.png',
+            salad: 'images/salad.png',
+            chatni: 'images/chatni.png',
+            raw_boti: 'images/raw_boti.png',
+            raw_tikka: 'images/raw_tikka.png',
+            raw_bbq: 'images/real_raw_bbq.png',
+            raw_kabab: 'images/raw_kabab.png',
+            raw_fish: 'images/raw_fish.png',
+            raw_wings: 'images/raw_wings.png',
+            duo_deal: 'images/real_duo_deal.jpg'
         };
 
         let defaultMenuData = {
@@ -447,20 +447,16 @@
 
         // Force image update to resolve old duplicate images in local storage
         if(menuData) {
-            let pItem = menuData.cooked.find(i=>i.id==='c6');
-            if(pItem) pItem.img = imgMap.polao;
+            ['deals', 'marinated', 'cooked'].forEach(cat => {
+                defaultMenuData[cat].forEach(dItem => {
+                    let mItem = menuData[cat].find(i => i.id === dItem.id);
+                    if(mItem) mItem.img = dItem.img;
+                });
+            });
             
-            let bbqRaw = menuData.marinated.find(i=>i.id==='m2');
-            if(bbqRaw) bbqRaw.img = imgMap.raw_bbq;
-            
-            let tikkaCooked = menuData.cooked.find(i=>i.id==='c2');
-            if(tikkaCooked) tikkaCooked.img = imgMap.tikka;
-            
+            // Also ensure deal3 name is updated as previously done
             let deal3 = menuData.deals.find(i=>i.id==='d3');
-            if(deal3) {
-                deal3.name = 'Premium Duo Deal';
-                deal3.img = imgMap.duo_deal;
-            }
+            if(deal3) deal3.name = 'Premium Duo Deal';
             
             localStorage.setItem('wk_menuData', JSON.stringify(menuData));
         }
@@ -755,7 +751,7 @@
             let cat = prompt("Category (deals/marinated/cooked):", "cooked"); if(!menuData[cat]) return alert("Invalid category");
             let price = prompt("Price:"); if(!price) return;
             let id = cat[0] + Math.floor(Math.random()*9000);
-            menuData[cat].push({ id, name, desc: 'Added by Admin', price: parseInt(price), img: 'chef_logo.png' });
+            menuData[cat].push({ id, name, desc: 'Added by Admin', price: parseInt(price), img: 'images/chef_logo.png' });
             localStorage.setItem('wk_menuData', JSON.stringify(menuData));
             renderAdminMenu(); renderMenu();
         }
